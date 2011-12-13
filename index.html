@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>JSLRU Demo</title>
+		<style type="text/css" media="screen">
+			table {
+				border:1px solid #999;
+				width:400px;
+			}
+			table td {
+				text-align:center;
+			}
+			table th {
+				border-bottom:1px solid #999;
+			}
+			textarea {
+				width:100%;
+				height:4em;
+			}
+		</style>
+		<script type="text/javascript" src="JSLRU.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			function printDump(c) {
+				var dumpData = c.dump();
+				
+				document.write('<table><tr><th>Key</th><th>Value</th><th>Access Time</th></tr>');
+				
+				for ( prop in dumpData ) {
+					document.write('<tr>');
+					document.write('<td>' + prop + '</td>');
+					document.write('<td>' + dumpData[prop].value + '</td>');
+					document.write('<td>' + dumpData[prop].accessTime + '</td>');
+					document.write('</tr>');
+				}
+				
+				document.write('</table>');
+			}
+			
+			function label(str) {
+				document.write('<p>'+str+'</p>');
+			}
+			
+			function assert(f) {
+				document.write( '<p>Assertion:</p>');
+				document.write( '<p>' + f + '</p>');
+				
+				var succeeded = false;
+				try {
+					succeeded = f();
+				} catch (err) {
+					document.write('<p>Assertion threw exception:</p>');
+					document.write('<textarea>' + err + '</textarea>');
+				}
+				
+				if ( succeeded ) {
+					document.write( '<p>Succeeded.</p> ');
+				} else {
+					document.write( '<p>Failed.</p> ');
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<script type="text/javascript" charset="utf-8">
+			label('Creating empty cache, size 2')
+			var cache = new LRUCache( 2 );
+			
+			printDump(cache);
+			
+			label('Adding foo=1')
+			cache.set('foo',1);
+			printDump(cache);
+			
+			label('Adding bar=2')
+			cache.set('bar',2);
+			printDump(cache);
+			
+			label('Adding bag=3')
+			cache.set('bag',3);
+			printDump(cache);
+			
+			label('Fetching bar (putting it in front)');
+			assert( function(){ return cache.get('bar') == 2; } );
+			printDump(cache);
+			
+			label('Adding marklar=4 (pushing bag out)')
+			cache.set('marklar',4);
+			printDump(cache);
+			
+			label('Updating bar=5 (putting it in front)')
+			cache.set('bar',5);
+			assert( function(){ return cache.get('bar') == 5; } );
+			printDump(cache);
+		</script>
+	</body>
+</html>
